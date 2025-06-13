@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer File Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" />
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .dark body {
+            background: #0f172a;
+        }
+
+        .glass-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .glass-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+        }
+
+        .stats-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .stats-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .stats-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .stats-card-alt {
+            border-left-color: #06b6d4;
+        }
+
+        .stats-card-success {
+            border-left-color: #10b981;
+        }
+
+        .btn-modern {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-modern:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .dark .btn-secondary {
+            background: #334155;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+        }
+
+        .dark .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .form-input {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 10px 12px;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .dark .form-input {
+            background: #334155;
+            border-color: #475569;
+            color: white;
+        }
+
+        .dark .form-input:focus {
+            border-color: #3b82f6;
+        }
+
+        .modern-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .dark .modern-table {
+            background: #1e293b;
+            border: 1px solid #334155;
+        }
+
+        table.dataTable thead th {
+            background: #f8fafc;
+            color: #374151;
+            font-weight: 600;
+            padding: 16px;
+            border: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dark table.dataTable thead th {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        table.dataTable tbody td {
+            padding: 16px;
+            border: none;
+            border-bottom: 1px solid #f1f5f9;
+            color: #374151;
+        }
+
+        .dark table.dataTable tbody td {
+            border-bottom: 1px solid #334155;
+            color: #e2e8f0;
+        }
+
+        table.dataTable tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        table.dataTable tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .dark table.dataTable tbody tr:hover {
+            background: #334155;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-match {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-no-match {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .dark .status-pending {
+            background: #451a03;
+            color: #fbbf24;
+        }
+
+        .dark .status-match {
+            background: #064e3b;
+            color: #34d399;
+        }
+
+        .dark .status-no-match {
+            background: #7f1d1d;
+            color: #fca5a5;
+        }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .modal-content {
+            background: #1e293b;
+            border: 1px solid #334155;
+        }
+
+        .toggle-switch {
+            width: 48px;
+            height: 24px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-switch.active {
+            background: #3b82f6;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        .action-btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .action-btn-view {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .action-btn-view:hover {
+            background: #2563eb;
+        }
+
+        .action-btn-download {
+            background: #10b981;
+            color: white;
+        }
+
+        .action-btn-download:hover {
+            background: #059669;
+        }
+
+        .action-btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .action-btn-delete:hover {
+            background: #dc2626;
+        }
+
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .text-primary {
+            color: #3b82f6;
+        }
+
+        .text-secondary {
+            color: #64748b;
+        }
+
+        .dark .text-secondary {
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="min-h-screen p-6">
+        <div class="glass-card p-6 mb-8 fade-in">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-primary">
+                        Customer File Dashboard
+                    </h1>
+                    <p class="text-secondary mt-1">Manage and track your uploaded files</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="toggle-switch" :class="{ active: isDarkMode }" @click="toggleDarkMode">
+                        <i :class="isDarkMode ? 'fas fa-moon' : 'fas fa-sun'"
+                            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-gray-600"
+                            :style="isDarkMode ? 'left: 20%' : 'left: 80%'"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stats-card fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-black">{{ totalFiles }}</h3>
+                        <p class="text-secondary text-sm">Total Files</p>
+                    </div>
+                    <i class="fas fa-file-alt text-2xl text-primary opacity-60"></i>
+                </div>
+            </div>
+            <div class="stats-card stats-card-alt fade-in" style="animation-delay: 0.1s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-black">{{ pendingFiles }}</h3>
+                        <p class="text-secondary text-sm">Pending</p>
+                    </div>
+                    <i class="fas fa-clock text-2xl text-cyan-500 opacity-60"></i>
+                </div>
+            </div>
+            <div class="stats-card stats-card-success fade-in" style="animation-delay: 0.2s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-black">{{ matchedFiles }}</h3>
+                        <p class="text-secondary text-sm">Matched</p>
+                    </div>
+                    <i class="fas fa-check-circle text-2xl text-emerald-500 opacity-60"></i>
+                </div>
+            </div>
+            <div class="stats-card fade-in" style="animation-delay: 0.3s; border-left-color: #ef4444;">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-black">{{ noMatchFiles }}</h3>
+                        <p class="text-secondary text-sm">No Match</p>
+                    </div>
+                    <i class="fas fa-times-circle text-2xl text-red-500 opacity-60"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 mb-8 fade-in" style="animation-delay: 0.4s">
+            <div class="flex flex-wrap gap-3">
+                <button @click="fetchFiles" class="btn-modern">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+                <button @click="exportToCSV" class="btn-secondary">
+                    <i class="fas fa-download"></i>
+                    Export CSV
+                </button>
+            </div>
+        </div>
+
+        <div class="modern-table fade-in" style="animation-delay: 0.5s">
+            <div v-if="isLoadingFiles" class="text-center py-16">
+                <i class="fas fa-spinner loading-spinner text-3xl text-primary mb-4"></i>
+                <p class="text-secondary">Loading files...</p>
+            </div>
+            <div v-else>
+                <table id="filesTable" class="w-full">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Filename</th>
+                            <th>Owner</th>
+                            <th>Work Detail</th>
+                            <th>Uploaded</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="file in files" :key="file.id">
+                            <td class="font-semibold text-primary">{{ file.id }}</td>
+                            <td class="font-medium">{{ file.filename }}</td>
+                            <td>{{ file.owner }}</td>
+                            <td class="max-w-xs truncate">{{ file.work_detail || 'N/A' }}</td>
+                            <td>{{ new Date(file.uploaded_at).toLocaleDateString() }}</td>
+                            <td>
+                                <span class="status-badge" :class="getStatusClass(file.similarity_status)">
+                                    {{ file.similarity_status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <button @click="showFileDetails(file)" class="action-btn action-btn-view">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a :href="`http://localhost:8000/api/download/${file.id}`"
+                                        class="action-btn action-btn-download">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    <button @click="deleteFile(file.id, file.owner)"
+                                        class="action-btn action-btn-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div v-if="files.length === 0 && !isLoadingFiles" class="text-center py-16">
+                    <i class="fas fa-folder-open text-5xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg">No files uploaded yet</p>
+                    <p class="text-gray-400 text-sm">Click the + button to upload your first file</p>
+                </div>
+            </div>
+        </div>
+
+        <button @click="showUploadModal = true" class="fab">
+            <i class="fas fa-plus"></i>
+        </button>
+
+        <div v-if="showUploadModal" class="fixed inset-0 flex items-center justify-center z-50 modal-overlay">
+            <div class="modal-content p-8 w-11/12 max-w-lg mx-4">
+                <h3 class="text-2xl font-bold mb-6 text-primary">
+                    Upload New File
+                </h3>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Owner</label>
+                        <select v-model="selectedOwner" class="form-input w-full">
+                            <option value="">Select an owner</option>
+                            <option v-for="owner in owners" :key="owner" :value="owner">{{ owner }}</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">File</label>
+                        <input type="file" @change="handleFileChange" class="form-input w-full">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Work Detail
+                            (Optional)</label>
+                        <textarea v-model="workDetail" rows="3" class="form-input w-full"
+                            placeholder="Enter work details..."></textarea>
+                    </div>
+
+                    <div v-if="result"
+                        :class="`p-4 rounded-lg text-sm font-medium ${uploadError ? 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-800' : 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800'}`">
+                        {{ result }}
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-8">
+                    <button @click="showUploadModal = false; result = ''; uploadError = false;"
+                        class="btn-secondary flex-1">
+                        Cancel
+                    </button>
+                    <button @click="uploadFile" :disabled="isProcessing" class="btn-modern flex-1">
+                        <i v-if="isProcessing" class="fas fa-spinner loading-spinner"></i>
+                        <i v-else class="fas fa-upload"></i>
+                        {{ isProcessing ? 'Uploading...' : 'Upload' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="showDetailModal" class="fixed inset-0 flex items-center justify-center z-50 modal-overlay">
+            <div class="modal-content p-8 w-11/12 max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+                <h3 class="text-2xl font-bold mb-6 text-primary">
+                    File Details
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm font-semibold text-secondary">ID</label>
+                            <p class="text-lg font-medium text-gray-900 dark:text-white">{{ currentFileDetails.id }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-secondary">Filename</label>
+                            <p class="text-lg font-medium text-gray-900 dark:text-white">{{ currentFileDetails.filename
+                                }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-secondary">Owner</label>
+                            <p class="text-lg font-medium text-gray-900 dark:text-white">{{ currentFileDetails.owner }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-secondary">Uploaded At</label>
+                            <p class="text-lg font-medium text-gray-900 dark:text-white">{{ new
+                                Date(currentFileDetails.uploaded_at).toLocaleString()
+                                }}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm font-semibold text-secondary">Status</label>
+                            <div class="mt-1">
+                                <span class="status-badge"
+                                    :class="getStatusClass(currentFileDetails.similarity_status)">
+                                    {{ currentFileDetails.similarity_status }}
+                                </span>
+                            </div>
+                        </div>
+                        <div v-if="currentFileDetails.total_amount">
+                            <label class="text-sm font-semibold text-secondary">Total Amount</label>
+                            <p class="text-lg font-medium text-gray-900 dark:text-white">{{
+                                parseFloat(currentFileDetails.total_amount).toFixed(2) }}
+                            </p>
+                        </div>
+                        <div v-if="currentFileDetails.receipt_date">
+                            <label class="text-sm font-semibold text-secondary">Receipt Date</label>
+                            <p class="text-lg font-medium text-gray-900 dark:text-white">{{ new
+                                Date(currentFileDetails.receipt_date).toLocaleDateString() }}</p>
+                        </div>
+                        <div v-if="currentFileDetails.similarity_score">
+                            <label class="text-sm font-semibold text-secondary">Similarity
+                                Score</label>
+                            <p class="text-lg font-medium text-gray-900 dark:text-white">{{
+                                parseFloat(currentFileDetails.similarity_score).toFixed(2)
+                                }}%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="currentFileDetails.work_detail" class="mt-6">
+                    <label class="text-sm font-semibold text-secondary">Work Detail</label>
+                    <p class="mt-2 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">{{
+                        currentFileDetails.work_detail }}</p>
+                </div>
+
+                <div class="flex justify-end mt-8">
+                    <button @click="showDetailModal = false" class="btn-modern">
+                        <i class="fas fa-times"></i>
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, computed, nextTick } = Vue; // Added nextTick
+
+        createApp({
+            setup() {
+                const selectedFile = ref(null);
+                const isProcessing = ref(false);
+                const result = ref('');
+                const uploadError = ref(false);
+                const owners = ref(['Owner1', 'Owner2', 'Owner3']);
+                const selectedOwner = ref('');
+                const files = ref([]);
+                const workDetail = ref('');
+                const isLoadingFiles = ref(false);
+                const isDarkMode = ref(false);
+                const showDetailModal = ref(false);
+                const showUploadModal = ref(false);
+                const currentFileDetails = ref({});
+
+                // Computed properties for stats - MODIFIED FOR LOWERCASE STATUS
+                const totalFiles = computed(() => files.value.length);
+
+                const pendingFiles = computed(() =>
+                    files.value.filter(f => f.similarity_status === 'pending').length // Changed from 'Pending' to 'pending'
+                );
+
+                const matchedFiles = computed(() =>
+                    files.value.filter(f => f.similarity_status === 'match').length // Changed from 'Match' to 'match'
+                );
+
+                const noMatchFiles = computed(() =>
+                    files.value.filter(f => f.similarity_status === 'no match').length // Changed from 'No Match' to 'no match'
+                );
+
+                const handleFileChange = (event) => {
+                    selectedFile.value = event.target.files[0];
+                };
+
+                const fetchFiles = async () => {
+                    isLoadingFiles.value = true;
+                    try {
+                        const response = await axios.get('http://localhost:8000/api/files');
+                        files.value = response.data;
+
+                        // Destroy existing DataTable before re-initializing
+                        if ($.fn.DataTable.isDataTable('#filesTable')) {
+                            $('#filesTable').DataTable().destroy();
+                        }
+
+                        // Use nextTick to ensure DOM is updated before DataTables init
+                        nextTick(() => {
+                            $('#filesTable').DataTable({
+                                responsive: true,
+                                order: [[0, "desc"]],
+                                pageLength: 10,
+                                dom: 'ftipr', // Controls table elements: filter, table, info, pagination, processing, row
+                                language: {
+                                    search: '',
+                                    searchPlaceholder: 'Search files...'
+                                }
+                            });
+                        });
+
+                    } catch (error) {
+                        console.error('Failed to fetch files:', error);
+                        alert('Failed to load files. Please check the backend connection.');
+                    } finally {
+                        isLoadingFiles.value = false;
+                    }
+                };
+
+                const uploadFile = async () => {
+                    if (!selectedFile.value || !selectedOwner.value) {
+                        result.value = 'Please select a file and an owner.';
+                        uploadError.value = true;
+                        return;
+                    }
+
+                    isProcessing.value = true;
+                    uploadError.value = false;
+                    result.value = '';
+
+                    const formData = new FormData();
+                    formData.append('file', selectedFile.value);
+                    formData.append('owner', selectedOwner.value);
+                    if (workDetail.value) {
+                        formData.append('work_detail', workDetail.value);
+                    }
+
+                    try {
+                        const response = await axios.post('http://localhost:8000/api/upload', formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        result.value = response.data.message;
+                        uploadError.value = false;
+
+                        selectedFile.value = null;
+                        // Clear the file input
+                        const fileInput = document.querySelector('input[type="file"]');
+                        if (fileInput) {
+                            fileInput.value = '';
+                        }
+                        selectedOwner.value = '';
+                        workDetail.value = '';
+
+                        // Close modal and clear result message after a delay
+                        setTimeout(() => {
+                            showUploadModal.value = false;
+                            result.value = '';
+                        }, 2000); // 2 seconds
+
+                        fetchFiles(); // Re-fetch files to update the table and stats
+                    } catch (error) {
+                        console.error('Upload failed:', error);
+                        uploadError.value = true;
+                        result.value = `Upload failed: ${error.response?.data?.detail || error.message}`;
+                    } finally {
+                        isProcessing.value = false;
+                    }
+                };
+
+                const deleteFile = async (fileId, fileOwner) => {
+                    if (confirm(`Are you sure you want to delete file ID ${fileId}?`)) {
+                        try {
+                            // Ensure the owner parameter is sent correctly if your backend requires it for deletion
+                            await axios.delete(`http://localhost:8000/api/files/${fileId}`, {
+                                params: { owner: fileOwner } // Assuming owner is needed as a query param
+                            });
+                            alert('File deleted successfully!');
+                            fetchFiles(); // Re-fetch files to update the table and stats
+                        } catch (error) {
+                            console.error('Delete failed:', error);
+                            alert(`Failed to delete file: ${error.response?.data?.detail || error.message}`);
+                        }
+                    }
+                };
+
+                const exportToCSV = async () => {
+                    try {
+                        const response = await axios.get('http://localhost:8000/api/export/csv', {
+                            responseType: 'blob' // Important for handling file downloads
+                        });
+
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        // Attempt to get filename from content-disposition header
+                        const contentDisposition = response.headers['content-disposition'];
+                        let filename = 'uploaded_files.csv'; // Default filename
+                        if (contentDisposition) {
+                            const filenameMatch = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^;"\n\r]+)['"]?/i);
+                            if (filenameMatch && filenameMatch[1]) {
+                                filename = decodeURIComponent(filenameMatch[1]);
+                            }
+                        }
+
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link); // Clean up the DOM
+                        window.URL.revokeObjectURL(url); // Release the object URL
+                        alert('Files exported successfully!');
+                    } catch (error) {
+                        console.error('Export failed:', error);
+                        alert('Failed to export files. Please check the backend connection.');
+                    }
+                };
+
+                // Helper function to get status class based on backend's lowercase status
+                const getStatusClass = (status) => {
+                    switch (status) {
+                        case 'pending':
+                            return 'status-pending';
+                        case 'match':
+                            return 'status-match';
+                        case 'no match': // Ensure this exactly matches your backend's "No Match" equivalent
+                            return 'status-no-match';
+                        default:
+                            return '';
+                    }
+                };
+
+                const toggleDarkMode = () => {
+                    isDarkMode.value = !isDarkMode.value;
+                    if (isDarkMode.value) {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('theme', 'light');
+                    }
+                };
+
+                const showFileDetails = (file) => {
+                    currentFileDetails.value = file;
+                    showDetailModal.value = true;
+                };
+
+                // On component mount, fetch files and apply dark mode preference
+                onMounted(() => {
+                    fetchFiles();
+                    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                        isDarkMode.value = true;
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        isDarkMode.value = false;
+                        document.documentElement.classList.remove('dark');
+                    }
+                });
+
+                return {
+                    selectedFile,
+                    isProcessing,
+                    result,
+                    uploadError,
+                    owners,
+                    selectedOwner,
+                    files,
+                    workDetail,
+                    isLoadingFiles,
+                    isDarkMode,
+                    showDetailModal,
+                    showUploadModal,
+                    currentFileDetails,
+                    // Export computed properties
+                    totalFiles,
+                    pendingFiles,
+                    matchedFiles,
+                    noMatchFiles,
+                    // Export methods
+                    handleFileChange,
+                    fetchFiles,
+                    uploadFile,
+                    deleteFile,
+                    exportToCSV,
+                    getStatusClass,
+                    toggleDarkMode,
+                    showFileDetails
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>

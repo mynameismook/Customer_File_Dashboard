@@ -1,0 +1,10 @@
+    fastapi
+    uvicorn
+    asyncpg
+    databases
+    python-multipart
+    psycopg2-binary
+    pandas
+    openpyxl
+    xlsxwriter
+    
